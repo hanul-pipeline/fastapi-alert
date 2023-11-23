@@ -7,7 +7,7 @@ sys.path.append(lib_dir)
 
 
 # confirmed
-def update_mysql_alert(data_received:dict):
+def update_mysql_alert(dictionary:dict):
     from database import mysql_conn
 
     # open connector
@@ -15,12 +15,12 @@ def update_mysql_alert(data_received:dict):
     cursor = conn.cursor()
 
     # get datas
-    date = data_received["date"]
-    time = data_received["time"]
-    location_id = data_received["location"]["id"]
-    sensor_id = data_received["sensor"]["id"]
-    type_id = data_received["type"]["id"]
-    grade = data_received["grade"]
+    date = dictionary["date"]
+    time = dictionary["time"]
+    location_id = dictionary["location"]["id"]
+    sensor_id = dictionary["sensor"]["id"]
+    type_id = dictionary["type"]["id"]
+    grade = dictionary["grade"]
 
     # update table
     QUERY = f"INSERT INTO alert "
@@ -55,7 +55,15 @@ def send_noti(dictionary:dict):
     for access_token in access_tokens:
         print(access_token)
         send_line_noti(access_token=access_token, message=message)
+        
 
+def do_alert(dictionary:dict):
+    from time import time
+    start_time = time()
+    update_mysql_alert(dictionary=dictionary)
+    send_noti(dictionary=dictionary)
+    end_time = time()
+    print(end_time - start_time)
 
 # test
 if __name__ == "__main__":

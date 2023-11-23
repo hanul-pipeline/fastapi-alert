@@ -1,9 +1,8 @@
 from fastapi import FastAPI
-from routers import update_parquet_router, remove_data_router
+from routers import alert_routers
 
 app = FastAPI()
-app.include_router(update_parquet_router.router)
-app.include_router(remove_data_router.router)
+app.include_router(alert_routers.router)
 
 if __name__ == "__main__":
     import uvicorn
