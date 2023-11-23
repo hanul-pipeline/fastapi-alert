@@ -2,13 +2,13 @@ import os
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
-
-def mysql_conn():
+# confirmed
+def mysql_conn(database:str):
     from mysql import connector
     from configparser import ConfigParser
 
     # define config dir
-    config_dir = os.path.join("../config/config.ini")
+    config_dir = os.path.join(current_dir, "../config/config.ini")
 
     # create config
     config = ConfigParser()
@@ -19,7 +19,7 @@ def mysql_conn():
         host=config.get("MySQL", "host"),
         port=config.get("MySQL", "port"),
         user=config.get("MySQL", "user"),
-        database=config.get("MySQL", "database"),
+        database=database,
         password=config.get("MySQL", "passwd")
     )
 
@@ -27,12 +27,13 @@ def mysql_conn():
     return conn
 
 
+# confirmed
 def return_informations(grade:str, location_id:int):
     # define dict
     information_dict = {}
 
     # open conn
-    conn = mysql_conn()
+    conn = mysql_conn("information")
     cursor = conn.cursor()
 
     # set base query and values

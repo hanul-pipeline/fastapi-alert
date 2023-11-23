@@ -17,8 +17,6 @@ def send_line_noti(access_token:str, message:str):
 
 
 # confirmed
-# database.return_informations(grade, location_id) => information
-# dict => grade, time, location_name, type_name
 def create_message(grade:str, time:str, location_name:str, type_name:str, information:dict):
     # create inspection message
     if grade == "inspection":
