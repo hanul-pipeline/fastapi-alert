@@ -2,6 +2,7 @@ import os, sys
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 lib_dir = os.path.join(current_dir, "../lib")
+log_dir = os.path.join(current_dir, "../log")
 
 sys.path.append(lib_dir)
 
@@ -58,12 +59,37 @@ def send_noti(dictionary:dict):
         
 
 def do_alert(dictionary:dict):
+    import logging
+    from logging.handlers import TimedRotatingFileHandler
+    from datetime import datetime, timedelta
     from time import time
+    
     start_time = time()
+    date = dictionary['date']
+    location_id = dictionary['location']['id']
+ 
+    def custom_converter(self, timestamp):
+        current_time = datetime.fromtimestamp(timestamp) + timedelta(hours=9)
+        return current_time.timetuple()
+
+    logging.Formatter.converter = custom_converter
+    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
+    file_handler = TimedRotatingFileHandler(
+        f"{log_dir}/do_alert/location_{location_id}/time_{date}.log", 
+        when="midnight", 
+        interval=1, 
+        backupCount=5, 
+        encoding="utf-8")
+    file_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+    logging.getLogger().addHandler(file_handler)    
+    
     update_mysql_alert(dictionary=dictionary)
     send_noti(dictionary=dictionary)
+    
     end_time = time()
-    print(end_time - start_time)
+    
+    logging.info(f"Time Spent(second): {end_time - start_time}")
+
 
 # test
 if __name__ == "__main__":
