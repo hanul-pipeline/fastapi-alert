@@ -5,6 +5,10 @@ from utils.alert_utils import *
 router = APIRouter()
 
 # confirmed
+@router.post('/alert/7/1', response_class=PlainTextResponse)
+async def alert_7_1(data_received: dict):
+    return do_alert(data_received)
+
 @router.post('/alert/7/2', response_class=PlainTextResponse)
 async def alert_7_2(data_received: dict):
     return do_alert(data_received)
