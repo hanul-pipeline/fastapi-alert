@@ -73,7 +73,7 @@ def do_alert(dictionary:dict):
         return current_time.timetuple()
 
     logging.Formatter.converter = custom_converter
-    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
     file_handler = TimedRotatingFileHandler(
         f"{log_dir}/do_alert/location_{location_id}/time_{date}.log", 
         when="midnight", 
@@ -89,6 +89,7 @@ def do_alert(dictionary:dict):
     end_time = time()
     
     logging.info(f"Time Spent(second): {end_time - start_time}")
+    logging.getLogger().removeHandler(file_handler)
 
 
 # test
