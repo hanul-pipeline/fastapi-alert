@@ -26,7 +26,6 @@ def mysql_conn(database:str):
     # return conn
     return conn
 
-
 # confirmed
 def return_informations(grade:str, location_id:int):
     # define dict

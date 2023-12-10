@@ -7,11 +7,10 @@ log_dir = os.path.join(current_dir, "../log")
 sys.path.append(lib_dir)
 
 
-# confirmed
+
 def update_mysql_alert(dictionary:dict):
     from database import mysql_conn
 
-    # open connector
     conn = mysql_conn("measurement")
     cursor = conn.cursor()
 
@@ -38,10 +37,9 @@ def update_mysql_alert(dictionary:dict):
     conn.close()
 
 
-# confirmed
 def send_noti(dictionary:dict):
     from database import return_informations
-    from notification import send_line_noti, create_message
+    from notification import send_line_noti_thread, create_message
 
     grade = dictionary["grade"]
     time = dictionary["time"]
@@ -55,47 +53,44 @@ def send_noti(dictionary:dict):
     access_tokens = [safety_manager["access_token"] for safety_manager in information["safety_manager"]] + [employee["access_token"] for employee in information["employee"]]
     for access_token in access_tokens:
         print(access_token)
-        send_line_noti(access_token=access_token, message=message)
+        send_line_noti_thread(access_token=access_token, message=message)
         
 
 def do_alert(dictionary:dict):
+    from log_libs import setup_logger, remove_logger
+    from os_libs import check_mkdirs
+    
     import logging
-    from logging.handlers import TimedRotatingFileHandler
     from datetime import datetime, timedelta
     from time import time
     
     start_time = time()
-    date = dictionary['date']
     location_id = dictionary['location']['id']
  
     def custom_converter(self, timestamp):
         current_time = datetime.fromtimestamp(timestamp) + timedelta(hours=9)
         return current_time.timetuple()
+    
+    log_file_dir = f"{log_dir}/time_spend/{location_id}"
+    check_mkdirs(log_file_dir) # module
 
     logging.Formatter.converter = custom_converter
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-    file_handler = TimedRotatingFileHandler(
-        f"{log_dir}/do_alert/location_{location_id}/time_{date}.log", 
-        when="midnight", 
-        interval=1, 
-        backupCount=5, 
-        encoding="utf-8")
-    file_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
-    logging.getLogger().addHandler(file_handler)    
     
-    update_mysql_alert(dictionary=dictionary)
-    send_noti(dictionary=dictionary)
+    logger = setup_logger(name="alert", level=logging.INFO, log_dir=log_file_dir) # module
+    
+    update_mysql_alert(dictionary=dictionary) # module
+    send_noti(dictionary=dictionary) # module
     
     end_time = time()
     
-    logging.info(f"Time Spent(second): {end_time - start_time}")
-    logging.getLogger().removeHandler(file_handler)
+    logger.info(f"{end_time - start_time} sec")
+    remove_logger(logger) # module
 
 
 # test
 if __name__ == "__main__":
     dict = {
-        "grade": "inspection",
+        "grade": "evacuation",
         "date": "2023-11-23",
         "time": "12:20:00",
         "sensor":{
@@ -111,5 +106,4 @@ if __name__ == "__main__":
         }
     }
 
-    update_mysql_alert(dict)
-    send_noti(dict)
+    do_alert(dictionary=dict)

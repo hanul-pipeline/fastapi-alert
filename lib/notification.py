@@ -16,6 +16,13 @@ def send_line_noti(access_token:str, message:str):
     return status
 
 
+def send_line_noti_thread(access_token:str, message:str):
+    from threading import Thread
+    
+    thread = Thread(target=send_line_noti, args=(access_token, message))
+    thread.start()
+
+
 # confirmed
 def create_message(grade:str, time:str, location_name:str, type_name:str, information:dict):
     # create inspection message
