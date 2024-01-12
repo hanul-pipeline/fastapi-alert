@@ -16,16 +16,43 @@ def mysql_conn(database:str):
 
     # create conn
     conn = connector.connect(
-        host=config.get("MySQL", "host"),
-        port=config.get("MySQL", "port"),
-        user=config.get("MySQL", "user"),
+        host=config.get("mysql", "host"),
+        port=config.get("mysql", "port"),
+        user=config.get("mysql", "user"),
         database=database,
-        password=config.get("MySQL", "passwd")
+        password=config.get("mysql", "passwd")
     )
 
     # return conn
     return conn
 
+def return_names(location_id, alert_id):
+    conn = mysql_conn("information")
+    cursor = conn.cursor()
+    
+    # get location name
+    QUERY = f"""
+    SELECT location_name
+    FROM location_view
+    WHERE location_id = {location_id}
+    """
+    cursor.execute(QUERY)
+    location_name = cursor.fetchall()[0][0]
+    
+    # get alert name
+    QUERY = f"""
+    SELECT alert
+    FROM alert_view
+    WHERE alert_id = {alert_id}
+    """
+    cursor.execute(QUERY)
+    alert = cursor.fetchall()[0][0]
+    
+    # close conn
+    conn.close()
+    
+    return (location_name, alert)
+    
 # confirmed
 def return_informations(grade:str, location_id:int):
     # define dict
@@ -38,7 +65,7 @@ def return_informations(grade:str, location_id:int):
     # set base query and values
     QUERY_building = """
     SELECT address
-    FROM building
+    FROM building_view
     WHERE building_id in (SELECT building_id FROM location WHERE location_id = %s)
     """
     VALUES_building = (location_id,)
@@ -46,7 +73,7 @@ def return_informations(grade:str, location_id:int):
     # safety manager
     QUERY_safetymanager = """
     SELECT access_token, phone_number
-    FROM safety_manager
+    FROM safety_manager_view
     WHERE location_id = %s
     """
     VALUES_safetymanager = (location_id,)
@@ -54,7 +81,7 @@ def return_informations(grade:str, location_id:int):
     # employee
     QUERY_employee = """
     SELECT access_token, phone_number
-    FROM employee
+    FROM employee_view
     WHERE location_id = %s
     """
 
@@ -87,6 +114,4 @@ def return_informations(grade:str, location_id:int):
     # close conn
     conn.close()
 
-    # return dict
     return information_dict
-
